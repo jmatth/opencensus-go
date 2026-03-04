@@ -36,6 +36,7 @@ const traceContextKey = "grpc-trace-bin"
 func (c *ClientHandler) traceTagRPC(ctx context.Context, rti *stats.RPCTagInfo) context.Context {
 	name := strings.TrimPrefix(rti.FullMethodName, "/")
 	name = strings.Replace(name, "/", ".", -1)
+	name = "DEBUGOC/" + name
 	ctx, span := trace.StartSpan(ctx, name,
 		trace.WithSampler(c.StartOptions.Sampler),
 		trace.WithSpanKind(trace.SpanKindClient)) // span is ended by traceHandleRPC
@@ -53,6 +54,7 @@ func (s *ServerHandler) traceTagRPC(ctx context.Context, rti *stats.RPCTagInfo) 
 	md, _ := metadata.FromIncomingContext(ctx)
 	name := strings.TrimPrefix(rti.FullMethodName, "/")
 	name = strings.Replace(name, "/", ".", -1)
+	name = "DEBUGOC/" + name
 	traceContext := md[traceContextKey]
 	var (
 		parent     trace.SpanContext
@@ -65,6 +67,7 @@ func (s *ServerHandler) traceTagRPC(ctx context.Context, rti *stats.RPCTagInfo) 
 		traceContextBinary := []byte(traceContext[0])
 		parent, haveParent = propagation.FromBinary(traceContextBinary)
 		if haveParent && !s.IsPublicEndpoint {
+			name = "WITHPARENT" + name
 			ctx, _ := trace.StartSpanWithRemoteParent(ctx, name, parent,
 				trace.WithSpanKind(trace.SpanKindServer),
 				trace.WithSampler(s.StartOptions.Sampler),
