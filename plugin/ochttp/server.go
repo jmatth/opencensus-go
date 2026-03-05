@@ -102,6 +102,7 @@ func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Requ
 	} else {
 		name = h.FormatSpanName(r)
 	}
+	name = "DEBUGOCHTTP" + name
 	ctx := r.Context()
 
 	startOpts := h.StartOptions
